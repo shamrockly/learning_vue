@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>My First JavaScript based on VUE.JS</h2>
+
+<div id="app">
+    <p>=====App=======================================================</p>
+	<p>{{ message }}</p>
+	
+	<ul>
+		<li v-for="product in products">
+		    <p>{{ product }}</p>
+			<p><input type="number" v-model.number="product.quantity"> {{ product.quantity }} {{ product.name }}
+			
+			<span v-if="product.quantity == 0">
+				- Out of Stock
+			</span>
+			<button @click="product.quantity += 1">
+				Add
+			</button>
+			</p>
+		</li>
+	</ul>
+	<h2>Total Inventory: {{ totalProducts }}<h2>
+</div>
+
+
+<div id="app2">
+    <p>=====App2=======================================================</p>
+	<h2 v-bind:title='message'>
+		Show message when you stay here for several seconds
+	</h2>
+	<p>{{ message }}</p>
+	<button v-on:click="reverseMessage">Reverse Message</button>
+	<button @click="reverseMessage">Short Reverse Message</button>
+	<ol>
+		<todo-item
+			v-for="item in groceryList"
+			v-bind:todo="item"
+			v-bind:key="item.id">
+		</todo-item>
+	</ol>
+</div>
+
+
+<div id="app3">
+    <p>=====App3=======================================================</p>
+	<h2>Template Syntax</h2>
+	<p>Using mustaches: {{ rawHtml }}</p>
+	<p>Using v-html directive: <span v-html="rawHtml"></span></p>
+	
+	<div v-bind:id="'list-' + id">
+		<p>number+1=> {{ number + 1}} </p>
+		<p>ok ? 'YES' : 'NO'=> {{ ok ? 'YES' : 'NO' }}</p>
+		<p v-if="seen">Now you can see me.</p>
+		<a v-bind:hrel="url">url</a>
+		<a :hrel="url">...</a>
+		<p>Original message: {{ message }}</p>
+		<p>Computed reverse message: {{ reversedMessage }}</p>
+		<p>Reverse message method: {{ reverseMethod() }}</p>
+		<p>fullName: {{ fullName }}</p>
+	</div>
+</div>
+
+<div id="watch-example">
+  <p>=====Watch Example=====================================</p>
+  <p>
+    Ask a yes/no question: <input v-model="question">
+  </p>
+  <p>{{ answer }}</p>
+</div>
+
+<div id="app4" 
+    clase="static" 
+	v-bind:class="[ { active: isActive, 'text-danger': hasError }, classObject1, classObject2 ]">
+
+    <p>=====App4=====================================</p>
+	<div v-bind:style="{ color: activeColor, fontSize: fontSize + 'px' }">Test Style: red, 30px</div>
+  
+</div>
+
+<div id="app5">
+    <p>=====App5=====================================</p>
+	<h1 v-if="ok">Yes</h1>
+	<h1 v-else>No</h1>
+
+	<div v-if="Math.random() > 0.5">
+		Now you see this div due to random > 0.5
+	</div>
+	<div v-else>
+		Now you can not see it because random < 0.5
+	</div>
+	
+	<div v-if="type === 'A'">
+		Type: A
+	</div>
+	<div v-else-if="type === 'B'">
+		Type: B
+	</div>
+	<div v-else-if="type === 'C'">
+		Type: C
+	</div>
+	<div v-else>
+		Type: Not A/B/C
+	</div>
+	
+	<h1 v-show="ok">Test v-show!</h1>
+	
+	<ul id="example-1">
+		<li v-for="item in items">
+			{{ item.message }}
+		</li>
+	</ul>
+</div>
+
+
+<!-- dev version: include warning and bugs -->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+
+<script>
+  const app = new Vue({
+    el: '#app',
+    data: {
+      message: 'Hello Vue.js!',
+      products: [
+	    'Boots',
+		'Jacket',
+		'Cat'
+		]
+    },
+	
+	created () {
+		fetch('https://api.myjson.com/bins/74l63')
+		.then(response => response.json())
+		.then(json => {
+			this.products = json.products
+		})
+	},
+	
+	computed: {
+		totalProducts () {
+			return this.products.reduce((sum, product) => {
+				return sum + product.quantity
+			}, 0)
+		}
+	}
+  })
+  
+  Vue.component('todo-item', {
+	props: ['todo'],
+	template: '<li>{{ todo.text }}</li>'
+  })
+  
+  
+  const app2 = new Vue({
+	el: '#app2',
+	data: {
+	  message: 'Page loaded ' + new Date().toLocaleString(),
+	  
+	  groceryList: [
+        { id: 0, text: '蔬菜' },
+        { id: 1, text: '奶酪' },
+        { id: 2, text: '随便其它什么人吃的东西' }
+      ]
+	},
+	
+	methods: {
+	  reverseMessage: function () {
+		this.message = this.message.split('').reverse().join('')
+	  } 
+	}
+  })
+  
+  const app3 = new Vue({
+	el: '#app3',
+	data: {
+		id: 1,
+		ok: true,
+		number: 1,
+		seen: true,
+		url: 'www.baidu.com',
+		message: 'yang liu',
+		firstName: 'Yang',
+		lastName: 'Liu',
+		rawHtml: '<span style="color:red">This should be red.</span>'
+	},
+	
+	computed: {
+		<!-- Only re-caculate when the value of the related parameter change -->
+		reversedMessage: function() {
+			return this.message.split('').reverse().join('')
+		},
+		
+		fullName: {
+			get: function () {
+				return this.firstName + ' ' + this.lastName
+			},
+			
+			set: function (newValue) {
+				var names = newValue.split(' ')
+				this.firstName = names[0]
+				this.lastName = names[names.length -1]
+			}
+		}
+	},
+	
+	methods: {
+		reverseMethod: function() {
+			return this.message.split('').reverse().join('')
+		}
+	}
+	
+  })
+  
+  var watchExampleVM = new Vue({
+    el: '#watch-example',
+    data: {
+      question: '',
+      answer: 'I cannot give you an answer until you ask a question!'
+    },
+    watch: {
+      // 如果 `question` 发生改变，这个函数就会运行
+      question: function (newQuestion, oldQuestion) {
+        this.answer = 'Waiting for you to stop typing...'
+        this.debouncedGetAnswer()
+      }
+    },
+	
+    created: function () {
+      // `_.debounce` 是一个通过 Lodash 限制操作频率的函数。
+      // 在这个例子中，我们希望限制访问 yesno.wtf/api 的频率
+      // AJAX 请求直到用户输入完毕才会发出。想要了解更多关于
+      // `_.debounce` 函数 (及其近亲 `_.throttle`) 的知识，
+      // 请参考：https://lodash.com/docs#debounce
+      this.debouncedGetAnswer = _.debounce(this.getAnswer, 500)
+    },
+    methods: {
+      getAnswer: function () {
+        if (this.question.indexOf('?') === -1) {
+          this.answer = 'Questions usually contain a question mark. ;-)'
+          return
+        }
+        this.answer = 'Thinking...'
+        var vm = this
+        axios.get('https://yesno.wtf/api')
+          .then(function (response) {
+            vm.answer = _.capitalize(response.data.answer)
+          })
+          .catch(function (error) {
+            vm.answer = 'Error! Could not reach the API. ' + error
+          })
+      }
+    }
+  })
+  
+  var app4 = new Vue ({
+    el: '#app4',
+    data: {
+	  isActive: true,
+	  error: null,
+	  hasError: false,
+	  
+	  activeColor: 'red',
+	  fontSize: 30,
+	  
+	  classObject1: {
+		active1: true,
+		'text_danger1': false
+	  }
+     
+    },
+	
+	computed: {
+		classObject2: function() {
+			return {
+				active2: this.isActive && !this.error,
+				'text-danger2': this.error && !this.error.type === 'fatal'
+			}
+		}
+	}
+  
+  })
+  
+  var app5 = new Vue ({
+	el: '#app5',
+	
+	data: {
+	  ok: true,
+	  type: 'A',
+	  items: [
+			{ message: 'Foo' },
+			{ message: 'Bar' }
+		]  
+	}
+	
+  })
+  
+  var example1 = new Vue ({
+	el: '#example-1',
+
+	data: {
+		items1: [
+			{ message: 'xoo' },
+			{ message: 'Bar' }
+		]
+	}
+  })
+  
+  
+</script>
+
+
+</body>
+</html> 
